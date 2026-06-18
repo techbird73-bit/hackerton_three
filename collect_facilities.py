@@ -7,8 +7,8 @@ collect_facilities.py
 - 실패분 로깅, 결과 캐싱(이미 변환한 주소 재호출 방지)
 
 키는 코드에 박지 말고 환경변수로:
-  export DATA_GO_KR_KEY="..."   (공공데이터포털 Decoding 키)
-  export VWORLD_KEY="..."       (VWorld 인증키)
+  export DATA_GO_KR_KEY="d5444eb6b56fd06b5dabfb964c8855018e1e40856cdb9bb5fa7a7c8782df4403"   (공공데이터포털 Decoding 키)
+  export VWORLD_KEY="F90D9AA5-EA5F-36DE-A9AB-72505520AF6D"       (VWorld 인증키)
 """
 import os
 import time
