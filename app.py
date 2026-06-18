@@ -132,20 +132,27 @@ if not OSMNX_OK:
     )
     st.stop()
 
-fac = load_facilities()
-if fac is None:
-    st.warning(
-        "facilities_geocoded.csv 가 없습니다. 먼저 collect_facilities.py 로 "
-        "복지시설을 수집·지오코딩하세요. (지금은 데모 좌표로 진행)"
-    )
-    # 데모용 세종시 일대 가상 시설
-    fac = pd.DataFrame({
+@st.cache_data
+def make_demo_facilities():
+    """데모 시설을 1회만 생성(rerun마다 위치가 바뀌어 깜빡이는 문제 방지)."""
+    rng = np.random.default_rng(42)
+    return pd.DataFrame({
         "fcltNm": [f"복지시설{i}" for i in range(8)],
         "cfbNm": ["노인복지시설"] * 8,
-        "lon": 127.27 + np.random.rand(8) * 0.04,
-        "lat": 36.47 + np.random.rand(8) * 0.04,
-        "capacity": np.random.randint(50, 200, 8),
+        "lon": 127.27 + rng.random(8) * 0.04,
+        "lat": 36.47 + rng.random(8) * 0.04,
+        "capacity": rng.integers(50, 200, 8),
     })
+
+
+fac = load_facilities()
+DEMO_MODE = fac is None
+if DEMO_MODE:
+    st.info(
+        "실데이터(facilities_geocoded.csv)가 없어 **데모 좌표**로 동작 중입니다. "
+        "실데이터를 보려면 collect_facilities.py 로 수집·지오코딩 후 다시 실행하세요."
+    )
+    fac = make_demo_facilities()
 
 with st.sidebar:
     st.header("분석 설정")
@@ -180,10 +187,19 @@ with col_map:
     ).add_to(fmap)
 
     st.caption("지도를 클릭해 분석 지점을 선택하세요.")
-    state = st_folium(fmap, height=520, key="map")
+    state = st_folium(
+        fmap, height=520, key="map",
+        returned_objects=["last_clicked"],   # 클릭 외 이벤트로 인한 rerun 방지
+    )
     if state and state.get("last_clicked"):
-        st.session_state.click_lat = state["last_clicked"]["lat"]
-        st.session_state.click_lon = state["last_clicked"]["lng"]
+        new_lat = round(state["last_clicked"]["lat"], 6)
+        new_lon = round(state["last_clicked"]["lng"], 6)
+        # 좌표가 실제로 바뀐 경우에만 갱신 → 무한 리렌더 루프 차단
+        if (new_lat != round(st.session_state.click_lat, 6) or
+                new_lon != round(st.session_state.click_lon, 6)):
+            st.session_state.click_lat = new_lat
+            st.session_state.click_lon = new_lon
+            st.rerun()
 
 with col_info:
     lat, lon = st.session_state.click_lat, st.session_state.click_lon
@@ -278,7 +294,7 @@ if st.session_state.get("iso") is not None:
     folium.Marker([lat, lon], icon=folium.Icon(color="red", icon="user"),
                   tooltip="분석 지점").add_to(rmap)
     folium.LayerControl().add_to(rmap)
-    st_folium(rmap, height=520, key="result_map")
+    st_folium(rmap, height=520, key="result_map", returned_objects=[])
 
 st.divider()
 st.caption(
