@@ -22,6 +22,18 @@ python collect_facilities.py     # facilities_geocoded.csv 생성
 streamlit run app.py
 ```
 
+## Streamlit Cloud 배포 (CSV 동봉 방식)
+앱은 실행 시 API를 호출하지 않고 `facilities_geocoded.csv`만 읽으므로,
+**배포 환경에 키가 필요 없습니다.**
+
+1. 로컬에서 `collect_facilities.py`로 본인 키를 써서 `facilities_geocoded.csv` 생성
+   (키는 환경변수로만 사용 — 소스/레포에 넣지 않음)
+2. 생성된 `facilities_geocoded.csv`를 레포에 커밋(현재 동봉된 샘플을 교체)
+3. share.streamlit.io → 레포 연결 → Main file: `app.py` → Deploy
+
+> 동봉된 `facilities_geocoded.csv`는 구조 확인용 **샘플**입니다.
+> 실서비스 시 위 1~2단계로 실데이터로 교체하세요.
+
 ## 데이터 (모두 공개)
 - 사회복지시설정보 (공공데이터포털, B554287)
 - VWorld 지오코딩 (국토교통부)

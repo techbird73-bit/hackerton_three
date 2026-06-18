@@ -2,7 +2,6 @@ __pycache__/
 *.pyc
 .env
 .streamlit/secrets.toml
-facilities_geocoded.csv
 geocode_cache.json
 geocode_failed.csv
 venv/
