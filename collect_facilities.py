@@ -66,10 +66,19 @@ def fetch_all_facilities(num_rows=100, max_pages=1000, sleep=0.2):
 # ──────────────────────────────────────────────
 # 2. 주소 결합
 # ──────────────────────────────────────────────
+def _safe_str(v):
+    """NaN(float)·None·숫자 등 어떤 값이 와도 안전하게 문자열로."""
+    if v is None:
+        return ""
+    if isinstance(v, float) and pd.isna(v):
+        return ""
+    return str(v).strip()
+
+
 def build_address(row):
     """fcltAddr + fcltDtl_1Addr(건물번호만) 결합. 법정동 괄호 제거."""
-    base = (row.get("fcltAddr") or "").strip()
-    detail = (row.get("fcltDtl_1Addr") or "").strip()
+    base = _safe_str(row.get("fcltAddr"))
+    detail = _safe_str(row.get("fcltDtl_1Addr"))
     # "16 (체부동)" → "16"
     if "(" in detail:
         detail = detail.split("(")[0].strip()
